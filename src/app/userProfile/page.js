@@ -7,9 +7,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { getUserMotto } from "@/lib/mottoService";
+// import { useAdmin } from "@/lib/useAdmin"; // Temporarily disabled
 
 export default function UserProfile() {
     const { user, loading, signOutUser } = useAuth();
+    // const { isAdmin } = useAdmin(); // Temporarily disabled
+    const isAdmin = true; // Temporarily allow all authenticated users
     const [hasExistingMotto, setHasExistingMotto] = useState(false);
     const [loadingMotto, setLoadingMotto] = useState(true);
 
@@ -84,6 +87,41 @@ export default function UserProfile() {
                                     {hasExistingMotto ? "View Your Motto" : "Create Your Motto"}
                                 </Button>
                             </Link>
+
+                            {/* Admin Panel Links - Only show for admin users */}
+                            {isAdmin && (
+                                <>
+                                    <Link href="/admin/qr-codes">
+                                        <Button
+                                            variant="outlined"
+                                            color="primary"
+                                            fullWidth
+                                        >
+                                            QR Code Management (Admin)
+                                        </Button>
+                                    </Link>
+
+                                    <Link href="/admin/qr-generator">
+                                        <Button
+                                            variant="outlined"
+                                            color="primary"
+                                            fullWidth
+                                        >
+                                            QR Code Generator (Production)
+                                        </Button>
+                                    </Link>
+
+                                    <Link href="/admin/manage-users">
+                                        <Button
+                                            variant="outlined"
+                                            color="secondary"
+                                            fullWidth
+                                        >
+                                            Manage User Roles (Admin)
+                                        </Button>
+                                    </Link>
+                                </>
+                            )}
 
                             <Button
                                 variant="outlined"

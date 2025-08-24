@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // users/{emailDocId} where emailDocId is sanitized email
+    match /users/{emailDocId} {
+      // Allow any authenticated user to create a document with their own UID
+      allow create: if request.auth != null &&
+        request.resource.data.uid == request.auth.uid;
+
+      // Allow reading a user document if:
+      // 1. The document exists and belongs to the authenticated user, OR
+      // 2. The document doesn't exist (for checking if user needs to be created), OR
+      // 3. The user is being accessed via QR code (public access for profile viewing)
+      allow read: if request.auth != null &&
+        (resource == null || resource.data.uid == request.auth.uid) ||
+        // Allow public read access for QR code profile viewing
+        (request.auth == null && resource != null && resource.data.motto != null);
+
+      // Update/Delete user doc: only the owner
+      allow update, delete: if request.auth != null &&
+        resource.data.uid == request.auth.uid;
+
+      // Subcollection 'mottos' under that user: allow the owner to read/write
+      match /mottos/{mottoId} {
+        allow read, write: if request.auth != null &&
+          get(/databases/$(database)/documents/users/$(emailDocId)).data.uid == request.auth.uid;
+      }
+    }
+
+    // qrCodes collection for QR code management
+    match /qrCodes/{qrCodeId} {
+      // Allow public read access to QR codes (for customer scanning)
+      // This is needed so customers can scan QR codes without being authenticated
+      allow read: if true;
+      
+      // Allow only admin users to create, update, and delete QR codes
+      allow create, update, delete: if request.auth != null && 
+        request.auth.token.role == 'admin';
+    }
+  }
+}

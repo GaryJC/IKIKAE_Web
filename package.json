@@ -13,10 +13,12 @@
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^6.4.1",
     "firebase": "^11.9.1",
+    "firebase-admin": "^13.4.0",
     "next": "15.1.6",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-qr-code": "^2.0.18"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
