@@ -1,6 +1,7 @@
+"use client";
+
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -9,18 +10,17 @@ import { getAuth } from "firebase/auth";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyDm5T4zDnFnOeqfFAgI5UxkieNkJYA9mE0",
-    authDomain: "ikikae-web.firebaseapp.com",
-    projectId: "ikikae-web",
-    storageBucket: "ikikae-web.firebasestorage.app",
-    messagingSenderId: "642510694791",
-    appId: "1:642510694791:web:db588a8c896be0e287cb22",
-    measurementId: "G-Q9ZD45DTTJ"
+    apiKey: "AIzaSyC5q8bjZCKkXWKXQRnqivkxUY147Qi5BH0",
+    authDomain: "ikikae-web-aaf32.firebaseapp.com",
+    projectId: "ikikae-web-aaf32",
+    storageBucket: "ikikae-web-aaf32.firebasestorage.app",
+    messagingSenderId: "304362126286",
+    appId: "1:304362126286:web:f50b019aae23525322c99f",
+    measurementId: "G-NXDME8VLGP"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
 

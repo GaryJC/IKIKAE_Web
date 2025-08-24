@@ -22,13 +22,17 @@ export function AuthProvider({ children }) {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
+                // Use email as document ID (replace dots and special chars for Firestore compatibility)
+                const emailDocId = currentUser.email.replace(/[.#$[\]]/g, '_');
+
                 // Check if user exists in Firestore
-                const userRef = doc(db, 'users', currentUser.uid);
+                const userRef = doc(db, 'users', emailDocId);
                 const docSnap = await getDoc(userRef);
 
                 if (!docSnap.exists()) {
                     // Create new user document
                     await setDoc(userRef, {
+                        uid: currentUser.uid, // Store the original UID for reference
                         name: currentUser.displayName,
                         email: currentUser.email,
                         image: currentUser.photoURL,

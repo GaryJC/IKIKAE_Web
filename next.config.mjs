@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     experimental: {
-        appDir: true,
+        // appDir: true,
+        // reactStrictMode: true,
+        // swcMinify: true,
     },
     images: {
         domains: ['placehold.co', 'lh3.googleusercontent.com'],
