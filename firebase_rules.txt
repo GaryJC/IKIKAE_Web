@@ -27,6 +27,31 @@ service cloud.firestore {
       }
     }
 
+    // mottos collection for public/private sharing
+    match /mottos/{mottoId} {
+      // Allow read of non-existent docs so clients can check availability
+      allow read: if resource == null ||
+        resource.data.visibility == 'public' ||
+        (request.auth != null && resource.data.ownerUid == request.auth.uid);
+
+      allow create: if request.auth != null &&
+        request.resource.data.ownerUid == request.auth.uid;
+
+      allow update, delete: if request.auth != null && (
+        resource.data.ownerUid == request.auth.uid ||
+        (
+          resource.data.visibility == 'public' &&
+          request.resource.data.diff(resource.data).changedKeys().hasOnly(['likeCount']) &&
+          request.resource.data.likeCount == resource.data.likeCount + 1
+        )
+      );
+
+      match /likes/{likeId} {
+        allow read, create, delete: if request.auth != null &&
+          request.auth.uid == likeId;
+      }
+    }
+
     // qrCodes collection for QR code management
     match /qrCodes/{qrCodeId} {
       // Allow public read access to QR codes (for customer scanning)

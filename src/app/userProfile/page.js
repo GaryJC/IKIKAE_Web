@@ -91,26 +91,6 @@ export default function UserProfile() {
                             {/* Admin Panel Links - Only show for admin users */}
                             {isAdmin && (
                                 <>
-                                    <Link href="/admin/qr-codes">
-                                        <Button
-                                            variant="outlined"
-                                            color="primary"
-                                            fullWidth
-                                        >
-                                            QR Code Management (Admin)
-                                        </Button>
-                                    </Link>
-
-                                    <Link href="/admin/qr-generator">
-                                        <Button
-                                            variant="outlined"
-                                            color="primary"
-                                            fullWidth
-                                        >
-                                            QR Code Generator (Production)
-                                        </Button>
-                                    </Link>
-
                                     <Link href="/admin/manage-users">
                                         <Button
                                             variant="outlined"

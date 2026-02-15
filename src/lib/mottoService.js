@@ -8,12 +8,15 @@ import {
     query,
     where,
     getDocs,
-    setDoc
+    setDoc,
+    runTransaction
 } from 'firebase/firestore';
 import { db } from './firebase';
 
-// Add a motto to the user document (only one motto per user allowed)
-export const addMotto = async (motto, user) => {
+const MOTTO_ID_REGEX = /^[a-zA-Z0-9_-]{4,12}$/;
+
+// Create a motto with a user-chosen ID (only one motto per user allowed)
+export const addMotto = async ({ motto, mottoId, visibility }, user) => {
     try {
         // Use email as document ID (replace dots and special chars for Firestore compatibility)
         const emailDocId = user.email.replace(/[.#$[\]]/g, '_');
@@ -21,17 +24,35 @@ export const addMotto = async (motto, user) => {
 
         // Check if user already has a motto
         const userDoc = await getDoc(userRef);
-        if (userDoc.exists() && userDoc.data().motto) {
+        if (userDoc.exists() && userDoc.data().mottoId) {
             return { success: false, error: 'You already have a motto. Each user can only create one motto.' };
         }
 
-        // Generate a unique numeric ID (1-999)
-        const generateNumericId = () => Math.floor(Math.random() * 999) + 1;
-        const mottoId = generateNumericId();
+        if (!mottoId || !MOTTO_ID_REGEX.test(mottoId)) {
+            return { success: false, error: 'Motto ID must be 4-12 characters (letters, numbers, _ or -).' };
+        }
 
-        // Update user document with motto
-        await updateDoc(userRef, {
+        if (!['public', 'private'].includes(visibility)) {
+            return { success: false, error: 'Visibility must be public or private.' };
+        }
+
+        const mottoRef = doc(db, 'mottos', mottoId);
+        const existingMotto = await getDoc(mottoRef);
+        if (existingMotto.exists()) {
+            return { success: false, error: 'This Motto ID is already taken. Please choose another.' };
+        }
+
+        await setDoc(mottoRef, {
             motto: motto.trim(),
+            visibility,
+            ownerUid: user.uid,
+            ownerEmail: user.email,
+            ownerName: user.displayName || 'Anonymous',
+            createdAt: serverTimestamp(),
+            likeCount: 0,
+        });
+
+        await updateDoc(userRef, {
             mottoId: mottoId,
             mottoCreatedAt: serverTimestamp(),
         });
@@ -50,16 +71,27 @@ export const getUserMotto = async (user) => {
         const userRef = doc(db, 'users', emailDocId);
         const userDoc = await getDoc(userRef);
 
-        if (userDoc.exists() && userDoc.data().motto) {
+        if (userDoc.exists() && userDoc.data().mottoId) {
             const data = userDoc.data();
+            const mottoId = String(data.mottoId);
+            const mottoRef = doc(db, 'mottos', mottoId);
+            const mottoDoc = await getDoc(mottoRef);
+
+            if (!mottoDoc.exists()) {
+                return { success: true, motto: null };
+            }
+
+            const mottoData = mottoDoc.data();
             return {
                 success: true,
                 motto: {
-                    id: data.mottoId,
-                    motto: data.motto,
-                    createdAt: data.mottoCreatedAt,
-                    userName: data.name,
-                    userEmail: data.email
+                    id: mottoId,
+                    motto: mottoData.motto,
+                    visibility: mottoData.visibility,
+                    createdAt: mottoData.createdAt,
+                    likeCount: mottoData.likeCount || 0,
+                    userName: mottoData.ownerName,
+                    userEmail: mottoData.ownerEmail
                 }
             };
         }
@@ -67,6 +99,99 @@ export const getUserMotto = async (user) => {
         return { success: true, motto: null };
     } catch (error) {
         console.error('Error getting motto:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+export const getMottoById = async (mottoId, user) => {
+    try {
+        const mottoRef = doc(db, 'mottos', mottoId);
+        const mottoDoc = await getDoc(mottoRef);
+
+        if (!mottoDoc.exists()) {
+            return { success: false, error: 'Motto not found' };
+        }
+
+        const mottoData = mottoDoc.data();
+        const isOwner = user && user.uid === mottoData.ownerUid;
+
+        if (mottoData.visibility === 'private' && !isOwner) {
+            return { success: false, error: 'This motto is private' };
+        }
+
+        return {
+            success: true,
+            motto: {
+                id: mottoId,
+                motto: mottoData.motto,
+                visibility: mottoData.visibility,
+                createdAt: mottoData.createdAt,
+                likeCount: mottoData.likeCount || 0,
+                userName: mottoData.ownerName,
+                userEmail: mottoData.ownerEmail,
+                isOwner
+            }
+        };
+    } catch (error) {
+        console.error('Error getting motto by ID:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+export const getMottoLikeStatus = async (mottoId, user) => {
+    try {
+        if (!user) {
+            return { success: true, liked: false };
+        }
+
+        const likeRef = doc(db, 'mottos', mottoId, 'likes', user.uid);
+        const likeDoc = await getDoc(likeRef);
+        return { success: true, liked: likeDoc.exists() };
+    } catch (error) {
+        console.error('Error checking like status:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+export const likeMotto = async (mottoId, user) => {
+    try {
+        if (!user) {
+            return { success: false, error: 'You must be signed in to like a motto.' };
+        }
+
+        const mottoRef = doc(db, 'mottos', mottoId);
+        const likeRef = doc(db, 'mottos', mottoId, 'likes', user.uid);
+
+        const result = await runTransaction(db, async (transaction) => {
+            const mottoDoc = await transaction.get(mottoRef);
+            if (!mottoDoc.exists()) {
+                throw new Error('Motto not found');
+            }
+
+            const mottoData = mottoDoc.data();
+            if (mottoData.visibility === 'private' && user.uid !== mottoData.ownerUid) {
+                throw new Error('This motto is private');
+            }
+
+            const likeDoc = await transaction.get(likeRef);
+            if (likeDoc.exists()) {
+                return { alreadyLiked: true, likeCount: mottoDoc.data().likeCount || 0 };
+            }
+
+            transaction.set(likeRef, {
+                createdAt: serverTimestamp(),
+                userEmail: user.email
+            });
+
+            const currentCount = mottoDoc.data().likeCount || 0;
+            transaction.update(mottoRef, { likeCount: currentCount + 1 });
+
+            return { alreadyLiked: false, likeCount: currentCount + 1 };
+        });
+
+        return { success: true, ...result };
+    } catch (error) {
+        console.error('Error liking motto:', error);
         return { success: false, error: error.message };
     }
 };
@@ -228,4 +353,3 @@ export const createQRCodeForProduction = async (qrCodeId) => {
         return { success: false, error: error.message };
     }
 };
-

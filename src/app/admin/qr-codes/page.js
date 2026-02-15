@@ -33,7 +33,7 @@ import {
 
 export default function QRCodeManagementPage() {
     const { user, loading } = useAuth();
-    // const { isAdmin, loading: adminLoading } = useAdmin(); // Temporarily disabled
+    // const { isAdmin, loading: adminLoading } = useAdn(); // Temporarily disabled
     const isAdmin = true; // Temporarily allow all authenticated users
     const adminLoading = false;
     const [qrCodes, setQrCodes] = useState([]);
