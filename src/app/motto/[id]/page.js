@@ -139,31 +139,8 @@ export default function MottoSharePage() {
                 minHeight: 'calc(100vh - 120px)',
                 padding: { xs: 3, md: 6 },
                 position: 'relative',
-                color: '#121212',
-                background: 'linear-gradient(120deg, #fef9f5 0%, #eaf0ff 55%, #f6f9f0 100%)',
+                backgroundColor: '#fcfcfc',
                 overflowX: 'hidden',
-                '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    width: 320,
-                    height: 320,
-                    borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(255,160,150,0.35), rgba(255,160,150,0))',
-                    top: -110,
-                    left: -80,
-                    filter: 'blur(2px)',
-                },
-                '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    width: 360,
-                    height: 360,
-                    borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(140,200,255,0.35), rgba(140,200,255,0))',
-                    bottom: -140,
-                    right: -120,
-                    filter: 'blur(2px)',
-                },
             }}
         >
             <Box sx={{ maxWidth: 720, margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -182,18 +159,17 @@ export default function MottoSharePage() {
                         sx={{
                             padding: { xs: 3, md: 4 },
                             borderRadius: 4,
-                            background: 'rgba(255,255,255,0.85)',
-                            border: '1px solid rgba(0,0,0,0.08)',
-                            boxShadow: '0 20px 60px rgba(15, 23, 42, 0.12)'
+                            backgroundColor: '#ffffff',
+                            border: '1px solid rgba(0,0,0,0.12)',
                         }}
                     >
                         <Stack spacing={3}>
                             <Box
                                 sx={{
                                     padding: 3,
-                                    backgroundColor: '#fff7f2',
+                                    backgroundColor: '#f2f2f2',
                                     borderRadius: 3,
-                                    border: '1px solid rgba(255, 159, 64, 0.2)',
+                                    border: '1px solid rgba(0,0,0,0.12)',
                                     textAlign: 'center'
                                 }}
                             >

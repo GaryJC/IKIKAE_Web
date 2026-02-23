@@ -1,11 +1,14 @@
 "use client"
 
-import { SessionProvider } from "next-auth/react"
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@mui/material/styles";
+import { muiTheme } from "./muiTheme";
 
 export default function Providers({ children }) {
     return (
-        <SessionProvider>
+        <ThemeProvider theme={muiTheme}>
+            <CssBaseline />
             {children}
-        </SessionProvider>
+        </ThemeProvider>
     )
 } 

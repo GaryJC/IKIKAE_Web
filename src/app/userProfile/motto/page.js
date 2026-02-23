@@ -133,31 +133,8 @@ export default function MottoPage() {
                 minHeight: 'calc(100vh - 120px)',
                 padding: { xs: 3, md: 6 },
                 position: 'relative',
-                color: '#121212',
-                background: 'linear-gradient(120deg, #fdfcfb 0%, #f3e7e9 45%, #e3eeff 100%)',
+                backgroundColor: '#fcfcfc',
                 overflowX: 'hidden',
-                '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    width: 360,
-                    height: 360,
-                    borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(255,180,120,0.35), rgba(255,180,120,0))',
-                    top: -120,
-                    right: -80,
-                    filter: 'blur(2px)',
-                },
-                '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    width: 420,
-                    height: 420,
-                    borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(120,160,255,0.35), rgba(120,160,255,0))',
-                    bottom: -160,
-                    left: -120,
-                    filter: 'blur(2px)',
-                },
             }}
         >
             <Box sx={{ maxWidth: 760, margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -185,9 +162,8 @@ export default function MottoPage() {
                         sx={{
                             padding: { xs: 3, md: 4 },
                             borderRadius: 4,
-                            background: 'rgba(255,255,255,0.85)',
-                            border: '1px solid rgba(0,0,0,0.08)',
-                            boxShadow: '0 20px 60px rgba(15, 23, 42, 0.12)'
+                            backgroundColor: '#ffffff',
+                            border: '1px solid rgba(0,0,0,0.12)',
                         }}
                     >
                         {existingMotto ? (
@@ -206,8 +182,8 @@ export default function MottoPage() {
                                     elevation={0}
                                     sx={{
                                         padding: 3,
-                                        backgroundColor: '#fff7f2',
-                                        border: '1px solid rgba(255, 159, 64, 0.2)',
+                                        backgroundColor: '#f2f2f2',
+                                        border: '1px solid rgba(0,0,0,0.12)',
                                         borderRadius: 3
                                     }}
                                 >
