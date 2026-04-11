@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 function FeatureCard({ eyebrow, title, description, className = "" }) {
@@ -26,8 +25,8 @@ export default function HomePage() {
             <div className="mx-auto w-full max-w-6xl px-6">
                 <section className="relative animate-fade-in pb-10 pt-14 md:pb-14 md:pt-20">
 
-                    <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
-                        <div className="max-w-2xl animate-rise-in">
+                    <div className="animate-rise-in">
+                        <div className="max-w-3xl">
                             <div className="text-[11px] font-semibold tracking-[0.22em] uppercase text-muted-foreground">
                                 生き変え / Ikikae
                             </div>
@@ -52,26 +51,6 @@ export default function HomePage() {
                                 >
                                     Why Ikikae
                                 </Link>
-                            </div>
-                        </div>
-
-                        <div className="animate-rise-in animate-delay-1 rounded-3xl border border-border bg-muted p-8 md:w-[360px]">
-                            <div className="flex items-center justify-between">
-                                <div className="text-xs font-semibold tracking-[0.22em] uppercase text-muted-foreground">
-                                    Motto Sample
-                                </div>
-                                <Image src="/image/logo.svg" alt="Ikikae" width={26} height={26} />
-                            </div>
-                            <div className="mt-6 rounded-2xl bg-background p-6">
-                                <div className="text-sm italic leading-7">
-                                    “Move with intent. Keep your eyes on the work.”
-                                </div>
-                                <div className="mt-4 text-xs text-muted-foreground">
-                                    ID: IKIKAE-019
-                                </div>
-                            </div>
-                            <div className="mt-4 text-xs leading-5 text-muted-foreground">
-                                Your profile can be opened from a QR code and shared as a link.
                             </div>
                         </div>
                     </div>

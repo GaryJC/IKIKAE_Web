@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function AboutPage() {
@@ -36,7 +35,7 @@ export default function AboutPage() {
 
         <div className="rounded-3xl border border-border bg-muted p-8">
           <div className="flex items-center gap-3">
-            <Image src="/image/logo.svg" alt="Ikikae" width={30} height={30} />
+            <img src="/image/logo.svg" alt="Ikikae" width={30} height={30} />
             <div className="text-xs font-semibold tracking-[0.28em] uppercase">
               生き変え
             </div>
@@ -57,4 +56,3 @@ export default function AboutPage() {
     </div>
   );
 }
-

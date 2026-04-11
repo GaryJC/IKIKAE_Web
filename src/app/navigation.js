@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import AuthButton from "./components/AuthButton";
 import { useState } from "react";
 
@@ -28,7 +27,7 @@ export default function Navigation() {
         <header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
                 <Link href="/" className="flex items-center gap-3">
-                    <Image src="/image/logo.svg" alt="Ikikae" width={28} height={28} />
+                    <img src="/image/logo.svg" alt="Ikikae" width={28} height={28} />
                     <span className="text-xs font-semibold tracking-[0.28em] uppercase">
                         Ikikae
                     </span>

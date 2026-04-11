@@ -65,3 +65,151 @@ body {
 .animate-delay-3 {
   animation-delay: 0.24s;
 }
+
+@keyframes intro-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes intro-overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes intro-circle-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.68);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes intro-mark-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+    letter-spacing: 0.52em;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 0.34em;
+  }
+}
+
+@keyframes intro-tagline-in {
+  0%,
+  35% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes intro-bar-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(var(--background));
+  animation: intro-overlay-in 280ms ease-out both;
+}
+
+.intro-overlay.is-leaving {
+  animation: intro-overlay-out 650ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.intro-stage {
+  position: relative;
+  width: 100%;
+  max-width: 42rem;
+  padding: 2.25rem 1.5rem;
+  text-align: center;
+}
+
+.intro-circle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(72vw, 34rem);
+  aspect-ratio: 1 / 1;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.08);
+  transform: translate(-50%, -50%);
+  animation: intro-circle-in 960ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.intro-mark {
+  position: relative;
+  font-size: clamp(1.05rem, 0.9vw + 0.8rem, 1.45rem);
+  font-weight: 700;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  animation: intro-mark-in 820ms cubic-bezier(0.2, 0.8, 0.2, 1) 140ms both;
+}
+
+.intro-tagline {
+  position: relative;
+  margin-top: 0.9rem;
+  font-size: clamp(0.95rem, 0.5vw + 0.82rem, 1.2rem);
+  color: rgb(var(--muted-foreground));
+  animation: intro-tagline-in 850ms cubic-bezier(0.2, 0.8, 0.2, 1) 260ms both;
+}
+
+.intro-bar {
+  position: relative;
+  margin: 1rem auto 0;
+  height: 2px;
+  width: min(12rem, 46vw);
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.26);
+  transform-origin: left;
+  animation: intro-bar-fill 1500ms linear 180ms both;
+}
+
+@media (max-width: 640px) {
+  .intro-stage {
+    max-width: 26rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .intro-circle {
+    width: min(86vw, 19rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-overlay,
+  .intro-circle,
+  .intro-mark,
+  .intro-tagline,
+  .intro-bar {
+    animation: none !important;
+  }
+}
