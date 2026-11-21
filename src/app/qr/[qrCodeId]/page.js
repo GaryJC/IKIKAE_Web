@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Button, Stack, Typography, Paper, Box, CircularProgress, Alert } from "@mui/material";
 import Link from "next/link";
 import { getUserProfileByQRCode } from "@/lib/mottoService";
 
 export default function QRProfilePage() {
     const params = useParams();
-    const [userProfile, setUserProfile] = useState(null);
+    const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
+    const [redirecting, setRedirecting] = useState(false);
+    const [countdown, setCountdown] = useState(null);
 
     useEffect(() => {
         if (params.qrCodeId) {
@@ -18,97 +19,129 @@ export default function QRProfilePage() {
         }
     }, [params.qrCodeId]);
 
+    useEffect(() => {
+        if (profile?.motivationalUrl) {
+            setCountdown(5);
+        }
+    }, [profile]);
+
+    useEffect(() => {
+        if (countdown === null) return;
+        if (countdown === 0) {
+            setRedirecting(true);
+            window.location.href = profile.motivationalUrl;
+            return;
+        }
+
+        const timer = setTimeout(() => setCountdown((value) => value - 1), 1000);
+        return () => clearTimeout(timer);
+    }, [countdown, profile]);
+
     const fetchProfile = async (qrCodeId) => {
         setLoading(true);
-        setError('');
-
+        setError("");
         try {
             const result = await getUserProfileByQRCode(qrCodeId);
             if (result.success && result.profile) {
-                setUserProfile(result.profile);
+                setProfile(result.profile);
             } else {
-                setError(result.error || 'Profile not found');
+                setError(result.error || "Profile not found");
             }
-        } catch (error) {
-            setError('Failed to load profile');
-            console.error('Error fetching profile:', error);
+        } catch (err) {
+            setError("Failed to load profile");
+            console.error("Error fetching profile:", err);
         } finally {
             setLoading(false);
         }
     };
 
-    if (loading) {
+    if (loading || redirecting) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-                <CircularProgress />
-            </Box>
+            <main className="flex min-h-screen items-center justify-center bg-[#080909] px-6 pt-24 text-white">
+                <div className="text-center">
+                    <div className="mx-auto h-5 w-5 rounded-full border-2 border-white/20 border-t-[#a26bff]" style={{ animation: "spin 0.75s linear infinite" }} />
+                    <p className="mt-5 text-[11px] font-black uppercase tracking-[0.28em] text-white/42">
+                        {redirecting ? "Opening URL" : "Reading Patch"}
+                    </p>
+                </div>
+            </main>
         );
     }
 
     if (error) {
         return (
-            <Stack spacing={3} maxWidth="600px" margin="0 auto" padding={3}>
-                <Paper elevation={3} sx={{ padding: 3 }}>
-                    <Stack spacing={2} alignItems="center">
-                        <Alert severity="error" sx={{ width: '100%' }}>
-                            {error}
-                        </Alert>
-                        <Typography variant="h6" textAlign="center">
-                            Unable to load profile
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" textAlign="center">
-                            This QR code may not be linked to a customer yet, or the customer hasn't created their motto.
-                        </Typography>
-                        <Link href="/">
-                            <Button variant="contained">Go Home</Button>
+            <main className="min-h-screen bg-[radial-gradient(circle_at_50%_0%,rgba(162,107,255,0.16),transparent_30%),#080909] px-6 pb-20 pt-32 text-white">
+                <section className="mx-auto max-w-md rounded-[10px] border border-[#a26bff]/35 bg-[#a26bff]/10 p-8 text-center">
+                    <div className="text-[11px] font-black uppercase tracking-[0.28em] text-[#c5a2ff]">QR Experience</div>
+                    <h1 className="mt-5 text-3xl font-black uppercase leading-tight">Patch not linked yet</h1>
+                    <p className="mt-4 text-sm leading-7 text-white/65">
+                        This QR exists, but it is not connected to a Dream Account. Create the account first, then ask the operator to link this shirt.
+                    </p>
+                    <div className="mt-8 grid gap-3">
+                        <Link href="/userProfile/motto" className="inline-flex h-12 items-center justify-center rounded-[4px] bg-white text-[11px] font-black uppercase text-black transition hover:bg-[#c5a2ff]">
+                            Create Account
                         </Link>
-                    </Stack>
-                </Paper>
-            </Stack>
+                        <Link href="/" className="inline-flex h-12 items-center justify-center rounded-[4px] border border-white/18 text-[11px] font-black uppercase text-white/70 transition hover:border-[#c5a2ff] hover:text-[#c5a2ff]">
+                            Back Home
+                        </Link>
+                    </div>
+                </section>
+            </main>
         );
     }
 
     return (
-        <Stack spacing={3} maxWidth="600px" margin="0 auto" padding={3}>
-            <Typography variant="h4" textAlign="center" gutterBottom>
-                Your Profile
-            </Typography>
+        <main className="min-h-screen bg-[radial-gradient(circle_at_50%_0%,rgba(162,107,255,0.16),transparent_30%),#080909] px-6 pb-20 pt-32 text-white">
+            <section className="mx-auto max-w-lg rounded-[10px] border border-[#a26bff]/35 bg-[#a26bff]/10 p-6 shadow-[0_28px_90px_rgba(0,0,0,0.32)] md:p-8">
+                <div className="flex items-start justify-between gap-6 border-b border-white/12 pb-6">
+                    <div>
+                        <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">QR Code</div>
+                        <div className="mt-2 text-xl font-black uppercase">#{profile.qrCodeId || params.qrCodeId}</div>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Status</div>
+                        <div className="mt-2 text-sm font-black uppercase text-[#c5a2ff]">Linked</div>
+                    </div>
+                </div>
 
-            <Paper elevation={3} sx={{ padding: 3 }}>
-                <Stack spacing={3} alignItems="center">
-                    <Typography variant="h5" textAlign="center">
-                        {userProfile.userName}'s Profile
-                    </Typography>
+                <div className="border-b border-white/12 py-8 text-center">
+                    <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Customer Account Page</div>
+                    <div className="mt-2 text-2xl font-black uppercase">#{profile.id || "Account"}</div>
+                    <div className="mt-7 text-4xl font-black leading-tight tracking-[-0.04em]">“{profile.motto}”</div>
+                    <div className="mt-6 text-sm text-white/50">{profile.userName}</div>
+                </div>
 
-                    <Box sx={{
-                        padding: 3,
-                        backgroundColor: '#f5f5f5',
-                        borderRadius: 2,
-                        width: '100%',
-                        textAlign: 'center'
-                    }}>
-                        <Typography variant="h6" gutterBottom>
-                            Your Motto
-                        </Typography>
-                        <Typography variant="body1" sx={{ fontStyle: 'italic' }}>
-                            "{userProfile.motto}"
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                            Profile ID: {userProfile.id}
-                        </Typography>
-                    </Box>
-
-                    <Alert severity="info" sx={{ width: '100%' }}>
-                        Thanks for scanning your t-shirt! This is your personal motto that you created.
-                    </Alert>
-
-                    <Link href="/">
-                        <Button variant="contained" fullWidth>
-                            Go Home
-                        </Button>
-                    </Link>
-                </Stack>
-            </Paper>
-        </Stack>
+                <div className="pt-7">
+                    {profile.motivationalUrl ? (
+                        <>
+                            <a
+                                href={profile.motivationalUrl}
+                                className="inline-flex h-12 w-full items-center justify-center rounded-[4px] bg-white text-[11px] font-black uppercase text-black transition hover:bg-[#c5a2ff]"
+                            >
+                                Open Motivational URL
+                            </a>
+                            {countdown !== null && countdown > 0 && (
+                                <div className="mt-4 text-center text-xs font-medium text-white/48">
+                                    Redirecting in {countdown}s
+                                </div>
+                            )}
+                            <button
+                                onClick={() => setCountdown(null)}
+                                className="mt-4 h-10 w-full text-[11px] font-black uppercase text-white/48 transition hover:text-white"
+                            >
+                                Stay on account page
+                            </button>
+                        </>
+                    ) : (
+                        <Link
+                            href={`/motto/${profile.id}`}
+                            className="inline-flex h-12 w-full items-center justify-center rounded-[4px] border border-white/18 text-[11px] font-black uppercase text-white transition hover:border-[#c5a2ff] hover:text-[#c5a2ff]"
+                        >
+                            View Public Account
+                        </Link>
+                    )}
+                </div>
+            </section>
+        </main>
     );
 }

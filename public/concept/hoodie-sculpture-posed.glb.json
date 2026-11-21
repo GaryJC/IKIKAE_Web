@@ -1,0 +1,10 @@
+{
+  "source": "artifacts/hoodie-study/hoodie-posed-source.glb",
+  "destination": "public/concept/hoodie-sculpture-posed.glb",
+  "inputBytes": 13075232,
+  "outputBytes": 3694844,
+  "inputTriangles": 150000,
+  "outputTriangles": 52000,
+  "lockedVertices": 30870,
+  "marbleTriangles": 33106
+}

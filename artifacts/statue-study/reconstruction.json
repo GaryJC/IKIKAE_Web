@@ -1,0 +1,142 @@
+{
+  "reference": "codex-clipboard-73469174-f63b-49d7-9b0f-2eae4d2ab30d.png",
+  "scope": "Statue only; later T-shirt fitting",
+  "first_attempt": {
+    "endpoint_id": "fal-ai/hyper3d/rodin/v2.5",
+    "request_id": "01a1e98a-3832-7420-8ef6-919e32f0cbdb",
+    "input": {
+      "image_urls": [
+        "https://v3b.fal.media/files/b/0ab2d46d/nT8ud3IJoqB7AHYJg9Sq1_codex-clipboard-73469174-f63b-49d7-9b0f-2eae4d2ab30d.png"
+      ],
+      "prompt": "Reconstruct ONLY the classical male marble statue from this reference, as a complete volumetric freestanding sculpture. Preserve the curly carved hair, handsome classical face, slightly tilted head, strong natural neck flowing continuously into broad shoulders, muscular chest and substantial back, arms and draped marble fabric around the hips. Natural human anatomy and proportions from all sides. The reference is photographed from below: do not bake perspective distortion into anatomy. Remove the smartphone entirely, reconstruct the occluded hand and body naturally; the hand is empty. Exclude the golden circle, all text, UI, background and decorative graphics. Warm ivory white marble throughout. Real rounded anatomical depth, detailed carved curls and facial features, smooth continuous neck and trapezius without seams. No separate head pedestal, no stretched neck, no flat billboard or relief. This is a statue asset for later clothing fitting.",
+      "tier": "Gen-2.5-High",
+      "quality_mesh_option": "150K Triangle",
+      "geometry_file_format": "glb",
+      "material": "PBR",
+      "texture_delight": true,
+      "preview_render": true,
+      "seed": 31742
+    },
+    "result": {
+      "model_mesh": {
+        "url": "https://v3b.fal.media/files/b/0ab2d481/hMATfDxyJ4nUer_P9t-72_base_basic_pbr.glb",
+        "content_type": "model/gltf-binary",
+        "file_name": "base_basic_pbr.glb",
+        "file_size": 13996008
+      },
+      "model_meshes": [],
+      "seed": 31742,
+      "textures": [
+        {
+          "url": "https://v3b.fal.media/files/b/0ab2d482/XyOLlqf-WqjsudkpeOH-5_preview.webp",
+          "content_type": "application/octet-stream",
+          "file_name": "preview.webp",
+          "file_size": 11758,
+          "width": null,
+          "height": null
+        },
+        {
+          "url": "https://v3b.fal.media/files/b/0ab2d482/dEVYbaqhAbLsb02UWrZn3_render.jpg",
+          "content_type": "application/octet-stream",
+          "file_name": "render.jpg",
+          "file_size": 14157,
+          "width": null,
+          "height": null
+        }
+      ]
+    },
+    "inspection": {
+      "status": "rejected",
+      "observed": [
+        "Smartphone and UI retained despite negative prompt.",
+        "Forearm and hand exaggerated by source perspective.",
+        "Head/neck more coherent than previous hybrid, but insufficient to accept whole model."
+      ],
+      "views": [
+        "front",
+        "side",
+        "back",
+        "untextured clay back"
+      ]
+    }
+  },
+  "repair": {
+    "status": "delivered approximate statue study",
+    "repairs_used": 1,
+    "endpoint_id": "fal-ai/hyper3d/rodin/v2.5",
+    "request_id": "01a1e992-cb68-7622-93de-16790ba7c25c",
+    "input": {
+      "image_urls": [
+        "https://v3b.fal.media/files/b/0ab2d4a3/ZAnlkZ-k4_GRaIMqvGw7Z_ikikae-statue-clean-reference.png"
+      ],
+      "prompt": "A complete volumetric reconstruction of this single classical ivory marble male statue, crown through mid-thigh, with a clean flat mid-thigh cut. Preserve his carved curly hair, face, tilted head, strong natural neck, broad shoulders, relaxed arms and hands, and fully covering carved classical tunic and draped robe. Realistic human proportions and continuous anatomically plausible head-neck-shoulder structure. Faithfully reproduce the reference's stone folds and carved facial features. Complete the unseen back as a coherent rounded human figure under draped stone cloth, with substantial chest/back depth, rounded shoulders and arms, not a flat relief. The neutral gray backdrop is not part of the asset. Isolated statue only, no platform, no props, no phone, no text, no halo. Warm ivory marble PBR with no baked shadows. Preserve normal human arm and hand size.",
+      "tier": "Gen-2.5-High",
+      "quality_mesh_option": "150K Triangle",
+      "geometry_file_format": "glb",
+      "material": "PBR",
+      "texture_delight": true,
+      "preview_render": true,
+      "seed": 31742
+    },
+    "reference_preparation": {
+      "tool": "built-in image_gen",
+      "file": "clean-reference.png",
+      "prompt": "Edit the provided image into a museum catalogue photograph of the same classical marble statue. Preserve the exact carved face, curled hair, head tilt, marble color and facial identity. The figure wears a fully covering classical stone tunic and draped robe from shoulders through the lower crop; no exposed torso. Remove the phone, screen, text, gold halo and all background graphics. Reconstruct both arms in normal human proportions, relaxed by the sides with empty hands. Present one statue in an eye-level almost frontal view without foreshortening, on a simple neutral gray studio background. Frame crown to mid-thigh, both hands visible, generous margin. Show a natural continuous neck and shoulders, detailed facial carving and stone fabric folds. Museum sculpture documentation, clothed classical art, one figure only, no props or text. This is an intermediate reference for a volumetric 3D asset, not a poster.",
+      "observations": [
+        "No phone, halo or UI.",
+        "Hands are now normal size.",
+        "Face and hair retain the classical style; exact identity is not guaranteed.",
+        "Fully clothed reference changes the original bare chest/drapery; later garment fitting is not done."
+      ]
+    },
+    "result": {
+      "model_mesh": {
+        "url": "https://v3b.fal.media/files/b/0ab2d4b8/UeVmaj1v0ije4WdZOeQxf_base_basic_pbr.glb",
+        "content_type": "model/gltf-binary",
+        "file_name": "base_basic_pbr.glb",
+        "file_size": 14971256
+      },
+      "model_meshes": [],
+      "seed": 31742,
+      "textures": [
+        {
+          "url": "https://v3b.fal.media/files/b/0ab2d4b8/htbdHdn9PsJYAYx6G1mjb_preview.webp",
+          "content_type": "application/octet-stream",
+          "file_name": "preview.webp",
+          "file_size": 5716,
+          "width": null,
+          "height": null
+        },
+        {
+          "url": "https://v3b.fal.media/files/b/0ab2d4b8/MbJsq05t7mYDg1HDea9u3_render.jpg",
+          "content_type": "application/octet-stream",
+          "file_name": "render.jpg",
+          "file_size": 10218,
+          "width": null,
+          "height": null
+        }
+      ]
+    },
+    "inspection": {
+      "observed_pass": [
+        "Phone, UI and halo absent.",
+        "Front and side show volumetric head, neck and torso.",
+        "Back and front clay views show geometric hair and fabric folds.",
+        "No browser console errors while loading or switching front/side/back/clay."
+      ],
+      "limitations": [
+        "Not an exact recovery of the original sculpture.",
+        "Clothed robe and relaxed arm pose differ from original reference.",
+        "Hidden back was generated, not recovered from source evidence.",
+        "Muscular body under robe and T-shirt fitting not established.",
+        "150,000 triangles and about 15 MB: source study only, not optimized for /concept."
+      ],
+      "screenshots": [
+        "front.jpg",
+        "side.jpg",
+        "back-clay.jpg"
+      ],
+      "user_approval": "not yet given"
+    }
+  }
+}

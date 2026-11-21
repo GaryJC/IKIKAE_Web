@@ -16,7 +16,7 @@ import { db } from './firebase';
 const MOTTO_ID_REGEX = /^[a-zA-Z0-9_-]{4,12}$/;
 
 // Create a motto with a user-chosen ID (only one motto per user allowed)
-export const addMotto = async ({ motto, mottoId, visibility }, user) => {
+export const addMotto = async ({ motto, mottoId, visibility, motivationalUrl = '' }, user) => {
     try {
         // Use email as document ID (replace dots and special chars for Firestore compatibility)
         const emailDocId = user.email.replace(/[.#$[\]]/g, '_');
@@ -45,6 +45,7 @@ export const addMotto = async ({ motto, mottoId, visibility }, user) => {
         await setDoc(mottoRef, {
             motto: motto.trim(),
             visibility,
+            motivationalUrl: motivationalUrl.trim(),
             ownerUid: user.uid,
             ownerEmail: user.email,
             ownerName: user.displayName || 'Anonymous',
@@ -54,6 +55,8 @@ export const addMotto = async ({ motto, mottoId, visibility }, user) => {
 
         await updateDoc(userRef, {
             mottoId: mottoId,
+            motto: motto.trim(),
+            motivationalUrl: motivationalUrl.trim(),
             mottoCreatedAt: serverTimestamp(),
         });
 
@@ -88,6 +91,7 @@ export const getUserMotto = async (user) => {
                     id: mottoId,
                     motto: mottoData.motto,
                     visibility: mottoData.visibility,
+                    motivationalUrl: mottoData.motivationalUrl || data.motivationalUrl || '',
                     createdAt: mottoData.createdAt,
                     likeCount: mottoData.likeCount || 0,
                     userName: mottoData.ownerName,
@@ -125,6 +129,7 @@ export const getMottoById = async (mottoId, user) => {
                 id: mottoId,
                 motto: mottoData.motto,
                 visibility: mottoData.visibility,
+                motivationalUrl: mottoData.motivationalUrl || '',
                 createdAt: mottoData.createdAt,
                 likeCount: mottoData.likeCount || 0,
                 userName: mottoData.ownerName,
@@ -262,19 +267,36 @@ export const getUserProfileByQRCode = async (qrCodeId) => {
         const userRef = doc(db, 'users', emailDocId);
         const userDoc = await getDoc(userRef);
 
-        if (!userDoc.exists() || !userDoc.data().motto) {
+        if (!userDoc.exists()) {
             return { success: false, error: 'User profile not found' };
         }
 
         const userData = userDoc.data();
+        let mottoData = null;
+        let mottoId = userData.mottoId || null;
+
+        if (mottoId) {
+            const mottoRef = doc(db, 'mottos', String(mottoId));
+            const mottoDoc = await getDoc(mottoRef);
+            if (mottoDoc.exists()) {
+                mottoData = mottoDoc.data();
+            }
+        }
+
+        if (!mottoData && !userData.motto) {
+            return { success: false, error: 'User profile not found' };
+        }
 
         return {
             success: true,
             profile: {
-                id: userData.mottoId,
-                motto: userData.motto,
+                id: mottoId,
+                motto: mottoData?.motto || userData.motto,
+                motivationalUrl: mottoData?.motivationalUrl || userData.motivationalUrl || '',
+                visibility: mottoData?.visibility || 'public',
                 userName: userData.name || 'Anonymous',
-                userEmail: userData.email
+                userEmail: userData.email,
+                qrCodeId: qrCodeData.qrCodeId
             }
         };
     } catch (error) {

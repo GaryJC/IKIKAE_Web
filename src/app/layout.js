@@ -2,9 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import "./globals.css";
 import Providers from "./providers";
-import Navigation from "./navigation";
-import { AuthProvider } from "../lib/AuthContext";
-import OpeningAnimation from "./components/OpeningAnimation";
+import SiteShell from "./components/SiteShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,15 +28,9 @@ export default async function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        <div className="min-h-screen w-full overflow-x-hidden">
-          <Providers>
-            <AuthProvider>
-              <OpeningAnimation enabled={!hasSeenIntro} />
-              <Navigation />
-              <main className="w-full">{children}</main>
-            </AuthProvider>
-          </Providers>
-        </div>
+        <Providers>
+          <SiteShell hasSeenIntro={hasSeenIntro}>{children}</SiteShell>
+        </Providers>
       </body>
     </html>
   );

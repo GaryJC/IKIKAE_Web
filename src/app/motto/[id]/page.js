@@ -3,15 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import {
-    Box,
-    Button,
-    CircularProgress,
-    Paper,
-    Stack,
-    Typography,
-    Alert
-} from "@mui/material";
 import { useAuth } from "@/lib/AuthContext";
 import { getMottoById, getMottoLikeStatus, likeMotto } from "@/lib/mottoService";
 
@@ -20,60 +11,49 @@ export default function MottoSharePage() {
     const { user, loading, signInWithGoogle } = useAuth();
     const [motto, setMotto] = useState(null);
     const [loadingMotto, setLoadingMotto] = useState(true);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
     const [likeCount, setLikeCount] = useState(0);
     const [liked, setLiked] = useState(false);
     const [liking, setLiking] = useState(false);
-    const [copyStatus, setCopyStatus] = useState('');
+    const [copyStatus, setCopyStatus] = useState("");
 
     useEffect(() => {
         const loadMotto = async () => {
             if (!params.id || loading) return;
             setLoadingMotto(true);
-            setError('');
+            setError("");
             try {
                 const result = await getMottoById(params.id, user);
                 if (result.success) {
                     setMotto(result.motto);
                     setLikeCount(result.motto.likeCount || 0);
-
                     if (user) {
                         const likeStatus = await getMottoLikeStatus(params.id, user);
-                        if (likeStatus.success) {
-                            setLiked(likeStatus.liked);
-                        }
-                    } else {
-                        setLiked(false);
+                        if (likeStatus.success) setLiked(likeStatus.liked);
                     }
                 } else {
-                    setError(result.error || 'Motto not found');
+                    setError(result.error || "Motto not found");
                 }
             } catch (err) {
-                console.error('Error loading motto:', err);
-                setError('Failed to load motto');
+                console.error("Error loading motto:", err);
+                setError("Failed to load motto");
             } finally {
                 setLoadingMotto(false);
             }
         };
-
         loadMotto();
     }, [params.id, user, loading]);
 
     const handleCopy = async () => {
-        const link = typeof window !== 'undefined' ? window.location.href : '';
+        const link = typeof window !== "undefined" ? window.location.href : "";
         if (!link) return;
         try {
-            if (navigator?.clipboard?.writeText) {
-                await navigator.clipboard.writeText(link);
-                setCopyStatus('Link copied.');
-            } else {
-                setCopyStatus('Copy not supported.');
-            }
-        } catch (error) {
-            console.error('Copy failed:', error);
-            setCopyStatus('Copy failed.');
+            await navigator.clipboard.writeText(link);
+            setCopyStatus("Copied.");
+        } catch {
+            setCopyStatus("Copy failed.");
         } finally {
-            setTimeout(() => setCopyStatus(''), 1500);
+            setTimeout(() => setCopyStatus(""), 1500);
         }
     };
 
@@ -84,15 +64,10 @@ export default function MottoSharePage() {
             const result = await likeMotto(params.id, user);
             if (result.success) {
                 setLiked(true);
-                if (!result.alreadyLiked) {
-                    setLikeCount(result.likeCount || likeCount + 1);
-                }
-            } else {
-                setError(result.error || 'Failed to like this motto');
+                if (!result.alreadyLiked) setLikeCount(result.likeCount || likeCount + 1);
             }
         } catch (err) {
-            console.error('Error liking motto:', err);
-            setError('Failed to like this motto');
+            console.error("Error liking motto:", err);
         } finally {
             setLiking(false);
         }
@@ -100,124 +75,112 @@ export default function MottoSharePage() {
 
     if (loading || loadingMotto) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-                <CircularProgress />
-            </Box>
+            <div className="flex min-h-[50vh] items-center justify-center">
+                <div
+                    className="h-5 w-5 rounded-full border-2 border-border border-t-foreground"
+                    style={{ animation: "spin 0.75s linear infinite" }}
+                />
+            </div>
         );
     }
 
     if (error) {
         return (
-            <Stack spacing={3} maxWidth="600px" margin="0 auto" padding={3}>
-                <Paper elevation={3} sx={{ padding: 3 }}>
-                    <Stack spacing={2} alignItems="center">
-                        <Alert severity="error" sx={{ width: '100%' }}>
-                            {error}
-                        </Alert>
-                        {error === 'This motto is private' && !user && (
-                            <Button variant="contained" onClick={signInWithGoogle}>
-                                Sign in to view
-                            </Button>
-                        )}
-                        <Link href="/">
-                            <Button variant="outlined">Go Home</Button>
-                        </Link>
-                    </Stack>
-                </Paper>
-            </Stack>
+            <div className="mx-auto w-full max-w-md px-6 py-20 text-center">
+                <div className="text-[11px] font-semibold tracking-[0.22em] uppercase text-muted-foreground">
+                    Not Found
+                </div>
+                <h1 className="mt-4 text-2xl font-semibold tracking-[-0.02em]">{error}</h1>
+                {error === "This motto is private" && !user && (
+                    <button
+                        onClick={signInWithGoogle}
+                        className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-foreground px-6 text-sm font-medium text-background hover:opacity-90"
+                    >
+                        Sign in to view
+                    </button>
+                )}
+                <div className="mt-4">
+                    <Link
+                        href="/"
+                        className="inline-flex h-11 items-center justify-center rounded-full border border-border px-6 text-sm font-medium text-foreground hover:bg-muted"
+                    >
+                        Back Home
+                    </Link>
+                </div>
+            </div>
         );
     }
 
-    if (!motto) {
-        return null;
-    }
+    if (!motto) return null;
 
     return (
-        <Box
-            sx={{
-                width: '100%',
-                minHeight: 'calc(100vh - 120px)',
-                padding: { xs: 3, md: 6 },
-                position: 'relative',
-                backgroundColor: '#fcfcfc',
-                overflowX: 'hidden',
-            }}
-        >
-            <Box sx={{ maxWidth: 720, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-                <Stack spacing={3}>
-                    <Stack spacing={1}>
-                        <Typography variant="overline" sx={{ letterSpacing: '0.2em', color: '#6b7280' }}>
-                            Shareable Motto
-                        </Typography>
-                        <Typography variant="h3" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
-                            {motto.userName}'s Motto
-                        </Typography>
-                    </Stack>
+        <div className="mx-auto w-full max-w-xl px-6 py-14">
 
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            padding: { xs: 3, md: 4 },
-                            borderRadius: 4,
-                            backgroundColor: '#ffffff',
-                            border: '1px solid rgba(0,0,0,0.12)',
-                        }}
+            {/* Eyebrow */}
+            <div className="mb-8">
+                <div className="text-[11px] font-semibold tracking-[0.22em] uppercase text-muted-foreground">
+                    Dream · {motto.userName}
+                </div>
+            </div>
+
+            {/* Motto card — the centrepiece */}
+            <div className="rounded-2xl border border-border bg-foreground px-8 py-10 text-background">
+                <div className="text-[11px] font-semibold tracking-[0.22em] uppercase text-background/50">
+                    Dream ID
+                </div>
+                <div className="mt-1 text-2xl font-semibold tracking-[-0.02em]">
+                    #{motto.id}
+                </div>
+                <div className="mt-6 text-xl italic leading-8 text-background/90 md:text-2xl">
+                    "{motto.motto}"
+                </div>
+            </div>
+
+            {/* Actions */}
+            <div className="mt-4 flex flex-col gap-3">
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleLike}
+                        disabled={!user || liked || liking}
+                        className={`flex-1 flex h-11 items-center justify-center gap-2 rounded-full border text-sm font-medium transition-colors ${
+                            liked
+                                ? "border-foreground bg-foreground text-background"
+                                : "border-border bg-background text-foreground hover:bg-muted disabled:opacity-50"
+                        }`}
                     >
-                        <Stack spacing={3}>
-                            <Box
-                                sx={{
-                                    padding: 3,
-                                    backgroundColor: '#f2f2f2',
-                                    borderRadius: 3,
-                                    border: '1px solid rgba(0,0,0,0.12)',
-                                    textAlign: 'center'
-                                }}
-                            >
-                                <Typography variant="h5" gutterBottom sx={{ fontStyle: 'italic' }}>
-                                    "{motto.motto}"
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    ID: {motto.id}
-                                </Typography>
-                            </Box>
+                        {liked ? "Respected" : liking ? "..." : "Respect"}
+                        <span className="text-xs opacity-60">{likeCount > 0 ? likeCount : ""}</span>
+                    </button>
+                    <button
+                        onClick={handleCopy}
+                        className="flex-1 flex h-11 items-center justify-center rounded-full border border-border bg-background text-sm font-medium text-foreground hover:bg-muted"
+                    >
+                        {copyStatus || "Copy Link"}
+                    </button>
+                </div>
 
-                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
-                                <Typography variant="body2" color="text.secondary">
-                                    Likes: {likeCount}
-                                </Typography>
-                                <Button
-                                    variant="contained"
-                                    onClick={handleLike}
-                                    disabled={!user || liked || liking}
-                                >
-                                    {liked ? 'Liked' : (liking ? 'Liking...' : 'Like')}
-                                </Button>
-                                <Button variant="outlined" onClick={handleCopy}>
-                                    Copy Link
-                                </Button>
-                            </Stack>
+                {!user && (
+                    <p className="text-center text-xs text-muted-foreground">
+                        Sign in to respect this dream.{" "}
+                        <button onClick={signInWithGoogle} className="underline hover:text-foreground">
+                            Sign in
+                        </button>
+                    </p>
+                )}
 
-                            {copyStatus && (
-                                <Typography variant="caption" color="text.secondary">
-                                    {copyStatus}
-                                </Typography>
-                            )}
+                <Link
+                    href="/"
+                    className="flex h-11 items-center justify-center rounded-full border border-border bg-background text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                    Back Home
+                </Link>
+            </div>
 
-                            {!user && (
-                                <Typography variant="body2" color="text.secondary">
-                                    Sign in to like this motto.
-                                </Typography>
-                            )}
-                        </Stack>
-                    </Paper>
+            {/* Footer note */}
+            <p className="mt-8 text-center text-xs text-muted-foreground">
+                This motto is registered at ikikae.com. It is sewn into their garment.
+            </p>
 
-                    <Stack direction="row" spacing={2}>
-                        <Link href="/">
-                            <Button variant="text">Go Home</Button>
-                        </Link>
-                    </Stack>
-                </Stack>
-            </Box>
-        </Box>
+        </div>
     );
 }

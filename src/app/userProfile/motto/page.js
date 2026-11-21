@@ -1,107 +1,132 @@
 "use client"
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/AuthContext';
-import {
-    Button,
-    TextField,
-    Typography,
-    Stack,
-    Paper,
-    Alert,
-    CircularProgress,
-    Box,
-    Divider,
-    MenuItem
-} from '@mui/material';
-import { addMotto, getUserMotto } from '@/lib/mottoService';
-import Link from 'next/link';
+import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/lib/AuthContext";
+import { addMotto, getUserMotto } from "@/lib/mottoService";
+import { readConceptDraft, clearConceptDraft } from "@/lib/conceptDraft";
+import Link from "next/link";
+
+const fieldClass = "mt-3 w-full rounded-[6px] border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-white/28 outline-none transition focus:border-[#ff9a76] disabled:opacity-50";
 
 export default function MottoPage() {
-    const { user, loading } = useAuth();
-    const [motto, setMotto] = useState('');
-    const [mottoId, setMottoId] = useState('');
-    const [visibility, setVisibility] = useState('public');
+    const { user, loading, signInWithGoogle } = useAuth();
+    const [motto, setMotto] = useState("");
+    const [mottoId, setMottoId] = useState("");
+    const [motivationalUrl, setMotivationalUrl] = useState("");
+    const [visibility, setVisibility] = useState("public");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [generatedId, setGeneratedId] = useState('');
-    const [error, setError] = useState('');
+    const [generatedId, setGeneratedId] = useState("");
+    const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [existingMotto, setExistingMotto] = useState(null);
     const [loadingMotto, setLoadingMotto] = useState(true);
-    const [shareUrl, setShareUrl] = useState('');
-    const [copyStatus, setCopyStatus] = useState('');
+    const [shareUrl, setShareUrl] = useState("");
+    const [copyStatus, setCopyStatus] = useState("");
+    const [mottoLoadedForUid, setMottoLoadedForUid] = useState(null);
+    const mottoEdited = useRef(false);
+    const conceptPrefilledForUid = useRef(null);
 
-    // Load user's existing motto
     useEffect(() => {
+        let cancelled = false;
+
         const loadUserMotto = async () => {
-            if (user) {
-                setLoadingMotto(true);
-                try {
-                    const result = await getUserMotto(user);
-                    if (result.success) {
-                        setExistingMotto(result.motto);
-                    }
-                } catch (error) {
-                    console.error('Error loading motto:', error);
-                } finally {
+            setExistingMotto(null);
+            setSuccess(false);
+            setGeneratedId("");
+            setError("");
+            setCopyStatus("");
+            setMottoLoadedForUid(null);
+
+            if (!user) {
+                setLoadingMotto(false);
+                return;
+            }
+
+            setLoadingMotto(true);
+            try {
+                const result = await getUserMotto(user);
+                if (!cancelled && result.success) {
+                    setExistingMotto(result.motto || null);
+                    setMottoLoadedForUid(user.uid);
+                }
+            } catch (err) {
+                console.error("Error loading motto:", err);
+            } finally {
+                if (!cancelled) {
                     setLoadingMotto(false);
                 }
-            } else {
-                setLoadingMotto(false);
             }
         };
 
         loadUserMotto();
-    }, [user]);
+        return () => {
+            cancelled = true;
+        };
+    }, [user?.uid]);
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (loading || loadingMotto || !user || mottoLoadedForUid !== user.uid || existingMotto) return;
+        if (mottoEdited.current || conceptPrefilledForUid.current === user.uid) return;
+        if (new URLSearchParams(window.location.search).get("draft") !== "concept") return;
+
+        const draft = readConceptDraft();
+        conceptPrefilledForUid.current = user.uid;
+        if (draft) setMotto((current) => current || draft);
+    }, [loading, loadingMotto, user, mottoLoadedForUid, existingMotto]);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
             setShareUrl(window.location.origin);
         }
     }, []);
 
-    const handleCopy = async (text) => {
-        if (!text) return;
+    const copyLink = async (id) => {
+        if (!shareUrl || !id) return;
         try {
-            if (navigator?.clipboard?.writeText) {
-                await navigator.clipboard.writeText(text);
-                setCopyStatus('Link copied.');
-            } else {
-                setCopyStatus('Copy not supported.');
-            }
-        } catch (error) {
-            console.error('Copy failed:', error);
-            setCopyStatus('Copy failed.');
+            await navigator.clipboard.writeText(`${shareUrl}/motto/${id}`);
+            setCopyStatus("Copied");
+        } catch {
+            setCopyStatus("Copy failed");
         } finally {
-            setTimeout(() => setCopyStatus(''), 1500);
+            setTimeout(() => setCopyStatus(""), 1600);
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!motto.trim()) {
-            setError('Please enter a motto');
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        if (!motto.trim() || !mottoId.trim()) {
+            setError("Dream ID and motto are required.");
             return;
         }
 
         setIsSubmitting(true);
-        setError('');
-
+        setError("");
         try {
-            const result = await addMotto({ motto, mottoId: mottoId.trim(), visibility }, user);
+            const result = await addMotto(
+                { motto, mottoId: mottoId.trim(), visibility, motivationalUrl: motivationalUrl.trim() },
+                user
+            );
 
             if (result.success) {
+                clearConceptDraft();
                 setGeneratedId(result.id);
                 setSuccess(true);
-                setMotto(''); // Clear the form
-                setMottoId('');
+                setExistingMotto({
+                    id: result.id,
+                    motto: motto.trim(),
+                    visibility,
+                    motivationalUrl: motivationalUrl.trim(),
+                    createdAt: null,
+                });
+                setMotto("");
+                setMottoId("");
+                setMotivationalUrl("");
             } else {
-                setError(result.error || 'Failed to save motto. Please try again.');
+                setError(result.error || "Failed to save. Please try again.");
             }
-        } catch (error) {
-            console.error('Error adding motto:', error);
-            setError('Failed to save motto. Please try again.');
+        } catch (err) {
+            console.error("Error adding motto:", err);
+            setError("Failed to save. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -109,286 +134,192 @@ export default function MottoPage() {
 
     if (loading || loadingMotto) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-                <CircularProgress />
-            </Box>
+            <div className="flex min-h-screen items-center justify-center bg-[#080909] pt-24">
+                <div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-[#ff9a76]" style={{ animation: "spin 0.75s linear infinite" }} />
+            </div>
         );
     }
 
     if (!user) {
         return (
-            <Stack spacing={2} alignItems="center">
-                <Typography variant="h5">Please sign in to create a motto</Typography>
-                <Link href="/">
-                    <Button variant="contained">Go Home</Button>
-                </Link>
-            </Stack>
+            <main className="min-h-screen bg-[#080909] px-6 pt-32 text-white">
+                <section className="mx-auto max-w-md rounded-[10px] border border-white/10 bg-white/[0.06] p-8 text-center">
+                    <div className="text-[11px] font-black uppercase tracking-[0.28em] text-[#ff9a76]">Dream Account</div>
+                    <h1 className="mt-5 text-3xl font-black uppercase leading-tight">Sign in to create your account</h1>
+                    <p className="mt-4 text-sm leading-6 text-white/62">Your Dream ID, motto, and reminder URL are attached to your garment workflow.</p>
+                    <button
+                        onClick={signInWithGoogle}
+                        className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-[4px] bg-white text-[11px] font-black uppercase text-black transition hover:bg-[#ff9a76]"
+                    >
+                        Sign In
+                    </button>
+                </section>
+            </main>
         );
     }
 
+    const activeMotto = existingMotto || (success ? { id: generatedId, motto, visibility, motivationalUrl } : null);
+
     return (
-        <Box
-            sx={{
-                width: '100%',
-                minHeight: 'calc(100vh - 120px)',
-                padding: { xs: 3, md: 6 },
-                position: 'relative',
-                backgroundColor: '#fcfcfc',
-                overflowX: 'hidden',
-            }}
-        >
-            <Box sx={{ maxWidth: 760, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-                <Stack spacing={4}>
-                    <Box>
-                        <Typography
-                            variant="h3"
-                            sx={{ fontWeight: 700, letterSpacing: '-0.02em', mb: 1 }}
-                        >
-                            Claim Your Motto
-                        </Typography>
-                        <Typography variant="body1" sx={{ color: '#444' }}>
-                            Pick a unique ID, set visibility, and share it with anyone you want.
-                        </Typography>
-                    </Box>
-
-                    <Link href="/userProfile">
-                        <Button variant="text" size="small">
-                            ← Back to Profile
-                        </Button>
+        <main className="min-h-screen bg-[radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.08),transparent_28%),#080909] px-6 pb-20 pt-32 text-white">
+            <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.88fr_1.12fr]">
+                <section>
+                    <Link href="/userProfile" className="text-[11px] font-black uppercase tracking-[0.18em] text-white/42 hover:text-[#ff9a76]">
+                        Account / Back
                     </Link>
+                    <div className="mt-8 text-[11px] font-black uppercase tracking-[0.32em] text-[#ff9a76]">Customer</div>
+                    <h1 className="mt-5 text-5xl font-black uppercase leading-[0.96] tracking-[-0.04em]">
+                        Create
+                        <br />
+                        Account.
+                    </h1>
+                    <p className="mt-6 max-w-md text-sm font-medium leading-7 text-white/65">
+                        Choose your Dream ID, write the motto that gets embroidered, and set the URL that opens when the QR patch is scanned.
+                    </p>
 
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            padding: { xs: 3, md: 4 },
-                            borderRadius: 4,
-                            backgroundColor: '#ffffff',
-                            border: '1px solid rgba(0,0,0,0.12)',
-                        }}
-                    >
-                        {existingMotto ? (
-                            <Stack spacing={3}>
-                                <Alert severity="info">
-                                    You already have a motto. Each user can only create one.
-                                </Alert>
+                    <div className="mt-10 space-y-4">
+                        {[
+                            ["01", "Choose Account ID + write motto"],
+                            ["02", "Add shirt to cart"],
+                            ["03", "Enter ID at checkout"],
+                            ["04", "Receive QR + embroidered motto"],
+                        ].map(([number, label]) => (
+                            <div key={number} className="flex items-center gap-4 rounded-[8px] border border-white/10 bg-white/[0.05] px-4 py-4">
+                                <span className="text-xl font-black text-[#ff9a76]">{number}</span>
+                                <span className="text-sm font-black uppercase">{label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </section>
 
-                                <Divider />
+                <section className="rounded-[10px] border border-white/10 bg-[#151718] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.28)] md:p-8">
+                    {activeMotto ? (
+                        <div>
+                            <div className="flex items-start justify-between gap-5 border-b border-white/12 pb-6">
+                                <div>
+                                    <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Account ID</div>
+                                    <div className="mt-2 text-2xl font-black uppercase">#{activeMotto.id}</div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Status</div>
+                                    <div className="mt-2 text-sm font-black uppercase text-[#ff9a76]">Synchronized</div>
+                                </div>
+                            </div>
 
-                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                    Your Motto
-                                </Typography>
+                            <div className="border-b border-white/12 py-7">
+                                <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Motto</div>
+                                <div className="mt-3 text-3xl font-black leading-tight">“{activeMotto.motto}”</div>
+                                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Visibility</div>
+                                        <div className="mt-2 text-sm uppercase text-white/72">{activeMotto.visibility}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Reminder URL</div>
+                                        <div className="mt-2 truncate text-sm text-white/72">{activeMotto.motivationalUrl || "Not set"}</div>
+                                    </div>
+                                </div>
+                            </div>
 
-                                <Paper
-                                    elevation={0}
-                                    sx={{
-                                        padding: 3,
-                                        backgroundColor: '#f2f2f2',
-                                        border: '1px solid rgba(0,0,0,0.12)',
-                                        borderRadius: 3
-                                    }}
-                                >
-                                    <Typography
-                                        variant="body1"
-                                        sx={{
-                                            fontSize: '1.15em',
-                                            fontStyle: 'italic',
-                                            marginBottom: 2,
-                                            lineHeight: 1.6
-                                        }}
+                            <div className="pt-7">
+                                <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Share Link</div>
+                                <div className="mt-3 break-all rounded-[6px] border border-white/10 bg-black/24 px-4 py-3 text-xs text-white/60">
+                                    {shareUrl ? `${shareUrl}/motto/${activeMotto.id}` : "Loading"}
+                                </div>
+                                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                                    <button
+                                        onClick={() => copyLink(activeMotto.id)}
+                                        className="inline-flex h-11 flex-1 items-center justify-center rounded-[4px] bg-white text-[11px] font-black uppercase text-black transition hover:bg-[#ff9a76]"
                                     >
-                                        "{existingMotto.motto}"
-                                    </Typography>
-
-                                    <Divider sx={{ marginY: 2 }} />
-
-                                    <Stack spacing={1}>
-                                        <Typography variant="body2" color="text.secondary">
-                                            <strong>ID:</strong> {existingMotto.id}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            <strong>Visibility:</strong> {existingMotto.visibility}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            <strong>Created:</strong> {existingMotto.createdAt ?
-                                                new Date(existingMotto.createdAt.seconds * 1000).toLocaleDateString() :
-                                                'Recently'
-                                            }
-                                        </Typography>
-                                    </Stack>
-                                </Paper>
-
-                                <Divider />
-
-                                <Stack spacing={1}>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Share link
-                                    </Typography>
-                                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="stretch">
-                                        <Paper
-                                            elevation={0}
-                                            sx={{
-                                                flexGrow: 1,
-                                                padding: 1.5,
-                                                borderRadius: 2,
-                                                border: '1px dashed rgba(0,0,0,0.2)',
-                                                backgroundColor: '#f8fafc',
-                                                wordBreak: 'break-all'
-                                            }}
-                                        >
-                                            {shareUrl ? `${shareUrl}/motto/${existingMotto.id}` : 'Loading...'}
-                                        </Paper>
-                                        <Button
-                                            variant="contained"
-                                            onClick={() => handleCopy(shareUrl ? `${shareUrl}/motto/${existingMotto.id}` : '')}
-                                            disabled={!shareUrl}
-                                            sx={{ whiteSpace: 'nowrap' }}
-                                        >
-                                            Copy
-                                        </Button>
-                                    </Stack>
-                                    {copyStatus && (
-                                        <Typography variant="caption" color="text.secondary">
-                                            {copyStatus}
-                                        </Typography>
-                                    )}
-                                </Stack>
-                            </Stack>
-                        ) : success ? (
-                            <Stack spacing={2}>
-                                <Alert severity="success">
-                                    Motto saved successfully!
-                                </Alert>
-                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                    Your Motto ID
-                                </Typography>
-                                <Paper
-                                    elevation={0}
-                                    sx={{
-                                        padding: 2,
-                                        backgroundColor: '#f8fafc',
-                                        fontFamily: 'monospace',
-                                        fontSize: '1.1em',
-                                        textAlign: 'center',
-                                        wordBreak: 'break-all',
-                                        borderRadius: 2,
-                                        border: '1px solid rgba(0,0,0,0.1)'
-                                    }}
-                                >
-                                    {generatedId}
-                                </Paper>
-                                <Typography variant="body2" color="text.secondary">
-                                    Save this ID. It is now yours.
-                                </Typography>
-                                <Stack spacing={1}>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Share link
-                                    </Typography>
-                                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="stretch">
-                                        <Paper
-                                            elevation={0}
-                                            sx={{
-                                                flexGrow: 1,
-                                                padding: 1.5,
-                                                borderRadius: 2,
-                                                border: '1px dashed rgba(0,0,0,0.2)',
-                                                backgroundColor: '#f8fafc',
-                                                wordBreak: 'break-all'
-                                            }}
-                                        >
-                                            {shareUrl ? `${shareUrl}/motto/${generatedId}` : 'Loading...'}
-                                        </Paper>
-                                        <Button
-                                            variant="contained"
-                                            onClick={() => handleCopy(shareUrl ? `${shareUrl}/motto/${generatedId}` : '')}
-                                            disabled={!shareUrl}
-                                            sx={{ whiteSpace: 'nowrap' }}
-                                        >
-                                            Copy
-                                        </Button>
-                                    </Stack>
-                                    {copyStatus && (
-                                        <Typography variant="caption" color="text.secondary">
-                                            {copyStatus}
-                                        </Typography>
-                                    )}
-                                </Stack>
-                            </Stack>
-                        ) : (
-                            <form onSubmit={handleSubmit}>
-                                <Stack spacing={3}>
-                                    <Stack spacing={1}>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Motto ID
-                                        </Typography>
-                                        <TextField
-                                            label="Claim your ID"
-                                            value={mottoId}
-                                            onChange={(e) => setMottoId(e.target.value)}
-                                            placeholder="4-12 chars: letters, numbers, _ or -"
-                                            fullWidth
-                                            variant="outlined"
-                                            disabled={isSubmitting}
-                                            inputProps={{ maxLength: 12 }}
-                                        />
-                                    </Stack>
-
-                                    <Stack spacing={1}>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Your Motto
-                                        </Typography>
-                                        <TextField
-                                            label="Write your motto"
-                                            multiline
-                                            rows={4}
-                                            value={motto}
-                                            onChange={(e) => setMotto(e.target.value)}
-                                            placeholder="Enter your inspiring motto here..."
-                                            fullWidth
-                                            variant="outlined"
-                                            disabled={isSubmitting}
-                                        />
-                                    </Stack>
-
-                                    <TextField
-                                        label="Visibility"
-                                        select
-                                        value={visibility}
-                                        onChange={(e) => setVisibility(e.target.value)}
-                                        fullWidth
-                                        variant="outlined"
+                                        {copyStatus || "Copy Link"}
+                                    </button>
+                                    <Link
+                                        href="/admin/qr-codes"
+                                        className="inline-flex h-11 flex-1 items-center justify-center rounded-[4px] border border-white/20 text-[11px] font-black uppercase text-white transition hover:border-[#ff9a76] hover:text-[#ff9a76]"
+                                    >
+                                        Link QR
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div className="grid gap-5 md:grid-cols-2">
+                                <label className="block">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Account ID</span>
+                                    <input
+                                        value={mottoId}
+                                        onChange={(event) => setMottoId(event.target.value)}
+                                        placeholder="e.g. BAR2026"
+                                        maxLength={12}
                                         disabled={isSubmitting}
-                                    >
-                                        <MenuItem value="public">Public (anyone with link)</MenuItem>
-                                        <MenuItem value="private">Private (only you)</MenuItem>
-                                    </TextField>
+                                        className={fieldClass}
+                                    />
+                                </label>
+                                <label className="block">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Motivational URL</span>
+                                    <input
+                                        type="url"
+                                        value={motivationalUrl}
+                                        onChange={(event) => setMotivationalUrl(event.target.value)}
+                                        placeholder="https://youtube.com/..."
+                                        disabled={isSubmitting}
+                                        className={fieldClass}
+                                    />
+                                </label>
+                            </div>
 
-                                    {error && (
-                                        <Alert severity="error">
-                                            {error}
-                                        </Alert>
-                                    )}
+                            <label className="block">
+                                <span className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Motto</span>
+                                <textarea
+                                    value={motto}
+                                    onChange={(event) => {
+                                        mottoEdited.current = true;
+                                        setMotto(event.target.value);
+                                    }}
+                                    placeholder="Stay in it."
+                                    rows={5}
+                                    disabled={isSubmitting}
+                                    className={`${fieldClass} resize-none`}
+                                />
+                            </label>
 
-                                    <Button
-                                        type="submit"
-                                        variant="contained"
-                                        size="large"
-                                        disabled={isSubmitting || !motto.trim() || !mottoId.trim()}
-                                    >
-                                        {isSubmitting ? 'Saving...' : 'Save Motto'}
-                                    </Button>
-                                </Stack>
-                            </form>
-                        )}
-                    </Paper>
+                            <div>
+                                <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/48">Visibility</div>
+                                <div className="mt-3 grid grid-cols-2 gap-3">
+                                    {["public", "private"].map((item) => (
+                                        <button
+                                            key={item}
+                                            type="button"
+                                            onClick={() => setVisibility(item)}
+                                            className={`h-11 rounded-[4px] border text-[11px] font-black uppercase transition ${visibility === item
+                                                ? "border-[#ff9a76] bg-[#ff9a76] text-black"
+                                                : "border-white/14 text-white/68 hover:border-white/36 hover:text-white"
+                                                }`}
+                                        >
+                                            {item}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
-                    <Typography variant="body2" color="text.secondary" textAlign="center">
-                        {existingMotto ?
-                            "Your motto is stored securely and accessible via its unique link." :
-                            "Each user can create only one motto. Choose your ID carefully."
-                        }
-                    </Typography>
-                </Stack>
-            </Box>
-        </Box>
+                            {error && (
+                                <div className="rounded-[6px] border border-[#ff9a76]/40 bg-[#ff9a76]/10 px-4 py-3 text-sm text-[#ffb395]">
+                                    {error}
+                                </div>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={isSubmitting || !motto.trim() || !mottoId.trim()}
+                                className="flex h-12 w-full items-center justify-center rounded-[4px] bg-white text-[11px] font-black uppercase text-black transition hover:bg-[#ff9a76] disabled:opacity-40"
+                            >
+                                {isSubmitting ? "Synchronizing" : "Create Dream Account"}
+                            </button>
+                        </form>
+                    )}
+                </section>
+            </div>
+        </main>
     );
 }
