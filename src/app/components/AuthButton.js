@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "../../lib/AuthContext"
 import { useState } from "react";
-import { Button } from "@mui/material";
 
 export default function AuthButtons() {
     const { user, loading, signInWithGoogle } = useAuth();
@@ -20,21 +19,34 @@ export default function AuthButtons() {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="h-9 w-24 rounded-[4px] border border-white/10 bg-white/10" />
+        );
+    }
+
     return (
         <div>
             {user ? (
                 <div className="flex items-center gap-2">
-                    <Image className="rounded-full" src={user.photoURL} alt="User Profile" width={32} height={32} />
-                    <Link href={"/userProfile"}>{user.displayName}</Link>
+                    {user.photoURL && (
+                        <Image className="rounded-full" src={user.photoURL} alt="User Profile" width={30} height={30} />
+                    )}
+                    <Link
+                        href={"/userProfile"}
+                        className="hidden max-w-[16ch] truncate text-[11px] font-black uppercase tracking-[0.08em] text-white/72 hover:text-[#ff9a76] lg:block"
+                    >
+                        {user.displayName}
+                    </Link>
                 </div>
             ) : (
-                <Button
-                    variant="contained"
+                <button
                     onClick={handleSignIn}
                     disabled={isSigningIn}
+                    className="inline-flex h-9 items-center justify-center rounded-[4px] border border-white/30 px-4 text-[11px] font-black uppercase tracking-[0.05em] text-white transition hover:border-[#ff9a76] hover:text-[#ff9a76] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    {isSigningIn ? "Signing in..." : "Sign In"}
-                </Button>
+                    {isSigningIn ? "Signing In" : "Sign In"}
+                </button>
             )}
         </div>
     );

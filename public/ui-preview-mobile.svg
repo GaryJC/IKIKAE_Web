@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <rect x="0" y="0" width="390" height="844" fill="#fcfcfc"/>
+  <circle cx="195" cy="70" r="150" fill="#000" opacity="0.07"/>
+
+  <!-- Header -->
+  <rect x="0" y="0" width="390" height="72" fill="#fcfcfc"/>
+  <rect x="0" y="71" width="390" height="1" fill="rgba(0,0,0,0.12)"/>
+  <text x="24" y="42" font-size="12" font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#0a0a0a" font-weight="700" letter-spacing="3">IKIKAE</text>
+  <rect x="264" y="22" rx="18" ry="18" width="102" height="36" fill="#0a0a0a"/>
+  <text x="292" y="46" font-size="13" font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#fcfcfc" font-weight="600">Sign In</text>
+
+  <!-- Hero -->
+  <text x="24" y="110" font-size="11" font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#525252" font-weight="700" letter-spacing="3">生き変え / IKIKAE</text>
+  <text x="24" y="164" font-size="38" font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#0a0a0a" font-weight="800">Wear the</text>
+  <text x="24" y="206" font-size="38" font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#0a0a0a" font-weight="800">sentence</text>
+  <text x="24" y="248" font-size="38" font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#0a0a0a" font-weight="800">you keep.</text>
+  <text x="24" y="282" font-size="14" font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#525252">Dream. Change. Achieve.</text>
+
+  <rect x="24" y="304" rx="22" ry="22" width="342" height="44" fill="#0a0a0a"/>
+  <text x="120" y="332" font-size="14" font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#fcfcfc" font-weight="700">Create Your Motto</text>
+  <rect x="24" y="360" rx="22" ry="22" width="342" height="44" fill="#fcfcfc" stroke="rgba(0,0,0,0.12)"/>
+  <text x="152" y="388" font-size="14" font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#0a0a0a" font-weight="700">Why Ikikae</text>
+
+  <!-- Feature cards -->
+  <g font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+    <rect x="24" y="430" rx="18" ry="18" width="342" height="112" fill="#fcfcfc" stroke="rgba(0,0,0,0.12)"/>
+    <text x="46" y="462" font-size="11" fill="#525252" font-weight="800" letter-spacing="3">01</text>
+    <text x="46" y="490" font-size="16" fill="#0a0a0a" font-weight="800">Claim a unique ID</text>
+    <text x="46" y="512" font-size="13" fill="#525252">One person, one motto.</text>
+
+    <rect x="24" y="554" rx="18" ry="18" width="342" height="112" fill="#fcfcfc" stroke="rgba(0,0,0,0.12)"/>
+    <text x="46" y="586" font-size="11" fill="#525252" font-weight="800" letter-spacing="3">02</text>
+    <text x="46" y="614" font-size="16" fill="#0a0a0a" font-weight="800">Control visibility</text>
+    <text x="46" y="636" font-size="13" fill="#525252">Public or private, your call.</text>
+
+    <rect x="24" y="678" rx="18" ry="18" width="342" height="112" fill="#fcfcfc" stroke="rgba(0,0,0,0.12)"/>
+    <text x="46" y="710" font-size="11" fill="#525252" font-weight="800" letter-spacing="3">03</text>
+    <text x="46" y="738" font-size="16" fill="#0a0a0a" font-weight="800">Connect it to QR</text>
+    <text x="46" y="760" font-size="13" fill="#525252">Scan, open, share.</text>
+  </g>
+</svg>
+

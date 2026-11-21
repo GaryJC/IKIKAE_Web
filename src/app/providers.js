@@ -1,11 +1,12 @@
 "use client"
 
-import { SessionProvider } from "next-auth/react"
+import { ThemeProvider } from "@mui/material/styles";
+import { muiTheme } from "./muiTheme";
 
 export default function Providers({ children }) {
     return (
-        <SessionProvider>
+        <ThemeProvider theme={muiTheme}>
             {children}
-        </SessionProvider>
+        </ThemeProvider>
     )
-} 
+}

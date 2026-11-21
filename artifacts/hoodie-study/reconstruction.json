@@ -1,0 +1,91 @@
+{
+  "scope": "Correct statue eyes; charcoal zip hoodie in home-page technical style; integrate into local Three.js concept.",
+  "user_choice": "先做炭黑拉链 hoodie，参考首页的机能风格",
+  "reference": {
+    "file": "/Users/gary/ikikae_web/artifacts/hoodie-study/reference.png",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve and precise-object-edit. Image 1 is the statue identity and pose reference. Image 2 is ONLY the charcoal technical garment material and construction reference, not a person or a sculpture. Make one clean front-facing 3D reconstruction reference of the same classical marble male statue wearing an IKIKAE charcoal ZIP-UP HOODIE. Replace ALL Roman robes with a substantial relaxed-fit modern cotton-fleece zip hoodie, hood DOWN resting naturally behind the neck, clean center zipper closed below the neck, long sleeves, ribbed cuffs and waistband, subtle technical seam panels and two discreet zipped hand pockets. Use image 2's matte charcoal fabric, dark hardware and low-profile sleeve patch language. Subtle small tonal IKIKAE wordmark on the wearer's left chest; no other text or UI. Leave a clean flat cloth area on the wearer's left front lower hem for later custom embroidery. Show a powerful broad-shouldered male torso under the hoodie, arms relaxed and slightly separated from the body, hands normal proportions, neutral charcoal trousers visible below waistband to mid-thigh. Head, neck and hands remain ivory marble. CRITICAL FACE REPAIR: preserve curly carved hair, jaw, nose and lips but correct BOTH eyes to clean matching classical stone eyes with distinct upper and lower eyelids, smooth convex solid stone eyeballs and shallow carved iris outlines, no pupils painted black, no hollow cavities, no collapsed or doubled eyelids, no broken eye. Face almost straight toward camera with only a subtle 5-degree head tilt; both eyes fully visible and equally clear. Neck is strong, natural and moderately short, continuously connected to shoulders. Soft neutral studio lighting revealing both eyes, no harsh shadows across eyes. Framed crown to mid-thigh with both hands fully visible, eye-level long-lens view without perspective distortion, simple neutral gray backdrop, single figure. NO phone, halo, pedestal, Roman toga, cape, decorative background, extra objects, extra views or grid. This is a clean image reference for true 3D reconstruction.",
+    "inputs": [
+      "artifacts/statue-study/clean-reference.png",
+      "public/generated/hero-garment.png"
+    ]
+  },
+  "generation": {
+    "endpoint_id": "fal-ai/hyper3d/rodin/v2.5",
+    "request_id": "01a1e9a0-753e-72b0-a378-c600b4e55d87",
+    "recipe": {
+      "endpoint_id": "fal-ai/hyper3d/rodin/v2.5",
+      "input": {
+        "image_urls": [
+          "https://v3b.fal.media/files/b/0ab2d4fb/9t5QraKGA9pqTijADhyCG_ikikae-hoodie-reference.png"
+        ],
+        "prompt": "Faithful high-detail volumetric reconstruction of this classical marble male statue wearing a charcoal zip-up technical hoodie and dark trousers. Preserve the reference exactly: curly carved hair, strong natural neck, broad shoulders, hood down behind neck, central zipper, seam panels, subtle IKIKAE chest embroidery, sleeve patch, long sleeves and realistic folds, ribbed cuffs and hem, complete relaxed stone hands. Crown to mid-thigh crop. CRITICAL: both eyes must have clean matching upper/lower eyelids and smooth convex solid stone eyeballs. Preserve both eye openings and shallow carved irises accurately, no hollow eye sockets, broken eye, doubled eyelids or collapsed eyeballs. The head is one continuous anatomically coherent sculpture. Ivory stone only on head, neck and hands; hoodie is matte charcoal cotton fabric, not marble. Complete rounded back with hood volume. Neutral background is excluded. No Roman robe, no phone, halo, pedestal or text overlay.",
+        "tier": "Gen-2.5-High",
+        "quality_mesh_option": "150K Triangle",
+        "geometry_file_format": "glb",
+        "material": "PBR",
+        "texture_delight": true,
+        "preview_render": true,
+        "seed": 31743
+      },
+      "note": "These are the submitted inputs, not resolved server defaults. For a variation, copy them and change only requested fields; reuse returned_seed when supported by the schema. Source URLs may expire."
+    },
+    "result": {
+      "model_mesh": {
+        "url": "https://v3b.fal.media/files/b/0ab2d50c/56u9PItZQIa6SySV01Dup_base_basic_pbr.glb",
+        "content_type": "model/gltf-binary",
+        "file_name": "base_basic_pbr.glb",
+        "file_size": 11729748
+      },
+      "model_meshes": [],
+      "seed": 31743,
+      "textures": [
+        {
+          "url": "https://v3b.fal.media/files/b/0ab2d50c/W52W-8xNL7S7BhP6_A8ZU_preview.webp",
+          "content_type": "application/octet-stream",
+          "file_name": "preview.webp",
+          "file_size": 6490,
+          "width": null,
+          "height": null
+        },
+        {
+          "url": "https://v3b.fal.media/files/b/0ab2d50c/lsQoNatEMHlugALhHbWgF_render.jpg",
+          "content_type": "application/octet-stream",
+          "file_name": "render.jpg",
+          "file_size": 7811,
+          "width": null,
+          "height": null
+        }
+      ]
+    }
+  },
+  "local_processing": {
+    "script": "scripts/optimize-concept-glb.mjs",
+    "source": "artifacts/hoodie-study/hoodie-source.glb",
+    "optimized": "public/concept/hoodie-sculpture.glb",
+    "input_bytes": 11729748,
+    "output_bytes": 3691740,
+    "input_triangles": 150000,
+    "output_triangles": 52000,
+    "locked_head_vertices": 30837,
+    "marble_triangles": 33106,
+    "eye_fix": "Regenerated frontal reference/model, then separated head/neck marble material from generated normal/color maps; retained real eyelid/eyeball geometry.",
+    "labels": "Exact IKIKAE woven chest badge and editable motto are Three.js surface decals, not baked into exported GLB."
+  },
+  "inspection": {
+    "passed": [
+      "Front/side/back volume and hood inspected.",
+      "Face close-up and clay view inspected; spurious eye wrinkles come from generated normal map and are absent with clean marble.",
+      "Desktop 1440x900 and mobile 390x844 concept layouts inspected.",
+      "Chinese text, 24-grapheme input, empty reset and forward/reverse chapter navigation checked.",
+      "Static fallback loads exported model image.",
+      "Fresh final page browser console has no errors."
+    ],
+    "limitations": [
+      "Concept hoodie, not an exact scan of an existing IKIKAE product.",
+      "Classic blank stone eyes rather than detailed iris reconstruction.",
+      "Physical mobile GPU/keyboard not tested; desktop-host motion measurement approximately 120 fps.",
+      "Original source GLB still has faulty generated eye maps; use optimized GLB for final asset."
+    ]
+  }
+}

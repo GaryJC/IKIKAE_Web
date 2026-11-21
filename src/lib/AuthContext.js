@@ -5,6 +5,7 @@ import { auth, db } from './firebase';
 import {
     onAuthStateChanged,
     signInWithPopup,
+    signInWithRedirect,
     GoogleAuthProvider,
     signOut,
 } from 'firebase/auth';
@@ -13,6 +14,14 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 // Create Context
 const AuthContext = createContext();
 
+const createGoogleProvider = () => {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+        prompt: 'select_account',
+    });
+    return provider;
+};
+
 // Provider Component
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -20,8 +29,22 @@ export function AuthProvider({ children }) {
 
     // Listen for auth state changes
     useEffect(() => {
+        let authEventId = 0;
+
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            if (currentUser) {
+            const eventId = authEventId + 1;
+            authEventId = eventId;
+            setLoading(true);
+
+            if (!currentUser) {
+                if (eventId === authEventId) {
+                    setUser(null);
+                    setLoading(false);
+                }
+                return;
+            }
+
+            try {
                 // Use email as document ID (replace dots and special chars for Firestore compatibility)
                 const emailDocId = currentUser.email.replace(/[.#$[\]]/g, '_');
 
@@ -41,25 +64,41 @@ export function AuthProvider({ children }) {
                     });
                 }
 
-                setUser(currentUser);
-            } else {
-                setUser(null);
+                if (eventId === authEventId) {
+                    setUser(currentUser);
+                }
+            } catch (error) {
+                console.error('Error preparing user profile:', error);
+                if (eventId === authEventId) {
+                    setUser(currentUser);
+                }
+            } finally {
+                if (eventId === authEventId) {
+                    setLoading(false);
+                }
             }
-            setLoading(false);
         });
 
         // Cleanup subscription on unmount
-        return () => unsubscribe();
+        return () => {
+            authEventId += 1;
+            unsubscribe();
+        };
     }, []);
 
     // Sign in with Google
     const signInWithGoogle = async () => {
-        const provider = new GoogleAuthProvider();
+        const provider = createGoogleProvider();
         try {
             await signInWithPopup(auth, provider);
-            // User is signed in
         } catch (error) {
+            if (error?.code === 'auth/popup-blocked' || error?.code === 'auth/cancelled-popup-request') {
+                await signInWithRedirect(auth, provider);
+                return;
+            }
+
             console.error('Error signing in with Google:', error);
+            throw error;
         }
     };
 

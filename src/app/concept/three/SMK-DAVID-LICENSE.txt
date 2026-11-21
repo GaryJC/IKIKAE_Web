@@ -1,0 +1,7 @@
+SMK - Statens Museum for Kunst
+Object KAS2232, Davids hoved (cast after Michelangelo Buonarroti).
+https://api.smk.dk/api/v1/art/?object_number=KAS2232
+Public domain: true. Rights: https://creativecommons.org/publicdomain/mark/1.0/
+Source scan: https://api.smk.dk/api/v1/download-3d/nz806401j_KAS2232_small.stl
+Modified: cropped pedestal and shoulders, aligned and blended neck, simplified mesh.
+The scan is distributed in generated geometry, without textures.
